@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offers Super Deals - Search Results</title>
+    <!-- Include the official Telegram Web App JavaScript SDK -->
+    <script src="https://telegram.org"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #000000);
+            margin: 0;
+            padding: 15px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .search-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--tg-theme-hint-color, #2481cc);
+        }
+        .product-card {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            padding: 15px;
+            background-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+        }
+        .product-img {
+            max-width: 100%;
+            height: 160px;
+            object-fit: contain;
+            background: white;
+            border-radius: 8px;
+            padding: 5px;
+        }
+        .product-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 10px 0 5px 0;
+            text-align: center;
+        }
+        .product-price {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-bottom: 15px;
+        }
+        .action-btn {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            text-transform: uppercase;
+            transition: background 0.2s;
+        }
+        .action-btn.converted {
+            background-color: #27ae60 !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="search-title" id="search-query">Searching items...</div>
+    </div>
+
+    <!-- Product Card 1: Amazon -->
+    <div class="product-card">
+        <img class="product-img" id="amzn-img" src="" alt="Product">
+        <div class="product-title" id="amzn-title">Loading Amazon Deal...</div>
+        <div class="product-price" id="amzn-price">Est. Price: --</div>
+        <button class="action-btn" id="amzn-btn" onclick="convertProduct('amzn')">⚡ Click to Convert (Amazon)</button>
+    </div>
+
+    <!-- Product Card 2: Flipkart -->
+    <div class="product-card">
+        <img class="product-img" id="flpk-img" src="" alt="Product">
+        <div class="product-title" id="flpk-title">Loading Flipkart Deal...</div>
+        <div class="product-price" id="flpk-price">Est. Price: --</div>
+        <button class="action-btn" id="flpk-btn" onclick="convertProduct('flpk')">⚡ Click to Convert (Flipkart)</button>
+    </div>
+
+    <script>
+        // Initialize Telegram Web App API
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+
+        // Parse inbound URL search string arguments 
+        const urlParams = new URLSearchParams(window.location.search);
+        
+        const productName = urlParams.get('query') || 'Product';
+        
+        // HARDCODED ID: Put your EarnKaro ID directly inside the quotes below
+        const affiliateId = '4466836'; 
+        
+        // Dynamic UI overrides extracted out from the bot payload strings
+        const amznPrice = urlParams.get('amzn_price') || '₹10,999';
+        const flpkPrice = urlParams.get('flpk_price') || '₹10,999';
+        const amznImg = urlParams.get('amzn_img') || 'https://unsplash.com';
+        const flpkImg = urlParams.get('flpk_img') || 'https://unsplash.com';
+
+        // Update Text & Image paths inside document interface dynamically
+        document.getElementById('search-query').innerText = "Results for: " + productName.toUpperCase();
+        
+        document.getElementById('amzn-title').innerText = productName + " (Amazon Store Best Match)";
+        document.getElementById('amzn-price').innerText = "Est. Price: " + amznPrice;
+        document.getElementById('amzn-img').src = amznImg;
+        
+        document.getElementById('flpk-title').innerText = productName + " (Flipkart Store Best Match)";
+        document.getElementById('flpk-price').innerText = "Est. Price: " + flpkPrice;
+        document.getElementById('flpk-img').src = flpkImg;
+
+        // Base search targets layout strings construction configuration
+        const amazonRawUrl = "https://amazon.in" + encodeURIComponent(productName);
+        const flipkartRawUrl = "https://flipkart.com" + encodeURIComponent(productName);
+
+        function convertProduct(platform) {
+            // Native Haptic Impact Buzz feedback call rule
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+
+            let targetUrl = (platform === 'amzn') ? amazonRawUrl : flipkartRawUrl;
+            let btnElement = (platform === 'amzn') ? document.getElementById('amzn-btn') : document.getElementById('flpk-btn');
+            
+            let encodedTarget = encodeURIComponent(targetUrl);
+            let earnkaroAffiliateUrl = `https://earnkaro.com{encodedTarget}&utm_source=telegram&utm_medium=bot&affid=${affiliateId}`;
+            
+            // 1. Shift UI structural tracking components into success layouts
+            btnElement.innerText = "🛒 EarnKaro Link Ready! Open Website";
+            btnElement.classList.add('converted');
+            
+            // 2. Change event execution hooks configuration ruleset
+            btnElement.setAttribute('onclick', `openAffiliateLink('${earnkaroAffiliateUrl}')`);
+        }
+
+        function openAffiliateLink(url) {
+            // Trigger an explicit verification tone pattern sequence hook
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            // Fire target outbound path via native SDK frame safely
+            tg.openLink(url);
+        }
+    </script>
+</body>
+</html>
